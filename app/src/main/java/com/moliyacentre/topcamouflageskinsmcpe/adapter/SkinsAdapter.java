@@ -19,7 +19,9 @@ public class SkinsAdapter extends RecyclerView.Adapter<SkinsAdapter.ViewHolder> 
     private OnItemSelected listener;
     private ArrayList<Skin> originalList;
 
-    
+
+
+
     public interface OnItemSelected {
         void onItemSelected(Skin skin);
     }
