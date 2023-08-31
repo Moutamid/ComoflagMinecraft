@@ -1,0 +1,282 @@
+package com.moliyacentre.topcamouflageskinsmcpe;
+
+import android.content.Context;
+import android.os.Build;
+import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Display;
+import android.view.Window;
+import android.widget.FrameLayout;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.OnUserEarnedRewardListener;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.gms.ads.rewarded.RewardItem;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+import com.moliyacentre.topcamouflageskinsmcpe.fragment.BaseFragment;
+import com.moliyacentre.topcamouflageskinsmcpe.fragment.IRewardAdded;
+import com.moliyacentre.topcamouflageskinsmcpe.fragment.SkinDetailsFragment;
+import com.moliyacentre.topcamouflageskinsmcpe.fragment.SkinsFragment;
+import com.moliyacentre.topcamouflageskinsmcpe.utils.LocalStorage;
+import com.moliyacentre.topcamouflageskinsmcpe.utils.SharedPref;
+import io.github.inflationx.viewpump.ViewPumpContextWrapper;
+
+
+public class MainActivity extends AppCompatActivity implements IMainManager {
+    private static InterstitialAd adMobInterstitialAd = null;
+    private static int countBanner = 1;
+    private static int countInterstitial = 1;
+    private static int countReward = 1;
+    public static FrameLayout frameLayout;
+    private String TAG = "MainActivity";
+    AdView adView;
+    private IRewardAdded calledOnResume;
+    private IRewardAdded fragmentCallback;
+    private InterstitialAd interstitialAd;
+    private SharedPref sharedPref;
+    private RewardedAd videoAd;
+
+    static  int access$008() {
+        int i = countReward;
+        countReward = i + 1;
+        return i;
+    }
+
+    static  int access$408() {
+        int i = countBanner;
+        countBanner = i + 1;
+        return i;
+    }
+
+    static  int access$708() {
+        int i = countInterstitial;
+        countInterstitial = i + 1;
+        return i;
+    }
+
+    @Override 
+    protected void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        setContentView(R.layout.activity_main);
+        this.sharedPref = new SharedPref(this);
+        if (Build.VERSION.SDK_INT >= 21) {
+            Window window = getWindow();
+            window.addFlags(Integer.MIN_VALUE);
+            window.clearFlags(67108864);
+        }
+        this.adView = new AdView(this);
+        frameLayout = (FrameLayout) findViewById(R.id.adView);
+        loadRewardedVideoAd();
+        loadAd(this);
+        loadBanner();
+        setScreen(SkinsFragment.createInstance(0));
+    }
+
+    @Override
+    protected void attachBaseContext(Context context) {
+        super.attachBaseContext(ViewPumpContextWrapper.wrap(context));
+    }
+
+    @Override 
+    public void addScreen(BaseFragment baseFragment) {
+        FragmentManager supportFragmentManager = getSupportFragmentManager();
+        if (supportFragmentManager == null) {
+            return;
+        }
+        supportFragmentManager.beginTransaction().replace(R.id.content_frame, baseFragment).addToBackStack(null).commit();
+    }
+
+    @Override 
+    public void setScreen(BaseFragment baseFragment) {
+        FragmentManager supportFragmentManager = getSupportFragmentManager();
+        if (supportFragmentManager == null) {
+            return;
+        }
+        supportFragmentManager.popBackStack((String) null, 1);
+        supportFragmentManager.beginTransaction().replace(R.id.content_frame, baseFragment).commit();
+    }
+
+    @Override 
+    public void closeScreen() {
+        FragmentManager supportFragmentManager = getSupportFragmentManager();
+        if (supportFragmentManager == null || supportFragmentManager.getBackStackEntryCount() == 0) {
+            return;
+        }
+        supportFragmentManager.popBackStack();
+    }
+
+    @Override 
+    public void showDialog(DialogFragment dialogFragment) {
+        dialogFragment.show(getSupportFragmentManager(), dialogFragment.getTag());
+    }
+
+    
+    public void loadRewardedVideoAd() {
+        String rewardUnitIdHigh;
+        int i = countReward;
+        if (i == 1) {
+            rewardUnitIdHigh = this.sharedPref.getRewardUnitIdHigh();
+        } else if (i == 2) {
+            rewardUnitIdHigh = this.sharedPref.getRewardUnitIdMid();
+        } else {
+            rewardUnitIdHigh = i != 3 ? "" : this.sharedPref.getRewardUnitIdLow();
+        }
+        RewardedAd.load(this, rewardUnitIdHigh, new AdRequest.Builder().build(), new RewardedAdLoadCallback() {
+            @Override 
+            public void onAdFailedToLoad(LoadAdError loadAdError) {
+                MainActivity.access$008();
+                if (MainActivity.countReward <= 3) {
+                    MainActivity.this.loadRewardedVideoAd();
+                } else {
+                    int unused = MainActivity.countReward = 0;
+                }
+                Log.d(MainActivity.this.TAG, loadAdError.toString());
+                MainActivity.this.videoAd = null;
+            }
+
+            @Override 
+            public void onAdLoaded(RewardedAd rewardedAd) {
+                MainActivity.this.videoAd = rewardedAd;
+                int unused = MainActivity.countReward = 0;
+                Log.d(MainActivity.this.TAG, "Reward Ad was loaded.");
+            }
+        });
+    }
+
+    
+    public void loadBanner() {
+        String bannerUnitIdHigh;
+        int i = countBanner;
+        if (i == 1) {
+            bannerUnitIdHigh = this.sharedPref.getBannerUnitIdHigh();
+        } else if (i == 2) {
+            bannerUnitIdHigh = this.sharedPref.getBannerUnitIdMid();
+        } else {
+            bannerUnitIdHigh = i != 3 ? "" : this.sharedPref.getBannerUnitIdLow();
+        }
+        AdView adView = new AdView(this);
+        this.adView = adView;
+        adView.setAdUnitId(bannerUnitIdHigh);
+        this.adView.setAdListener(new AdListener() { 
+            @Override 
+            public void onAdFailedToLoad(LoadAdError loadAdError) {
+                MainActivity.access$408();
+                if (MainActivity.countBanner <= 3) {
+                    MainActivity.this.loadBanner();
+                } else {
+                    int unused = MainActivity.countBanner = 0;
+                }
+                Log.i("BannerAd", "onAdFailedToLoad: " + MainActivity.countBanner);
+            }
+
+            @Override 
+            public void onAdLoaded() {
+                Log.i("BannerAd", "onAdLoaded: " + MainActivity.countBanner);
+                int unused = MainActivity.countBanner = 0;
+            }
+        });
+        frameLayout.removeAllViews();
+        frameLayout.addView(this.adView);
+        AdRequest build = new AdRequest.Builder().build();
+        AdSize adSize = getAdSize();
+        if (adSize != null) {
+            this.adView.setAdSize(adSize);
+            this.adView.loadAd(build);
+        }
+    }
+
+    public void loadAd(final MainActivity mainActivity) {
+        String interUnitIdHigh;
+        int i = countInterstitial;
+        if (i == 1) {
+            interUnitIdHigh = this.sharedPref.getInterUnitIdHigh();
+        } else if (i == 2) {
+            interUnitIdHigh = this.sharedPref.getInterUnitIdMid();
+        } else {
+            interUnitIdHigh = i != 3 ? "" : this.sharedPref.getInterUnitIdLow();
+        }
+        InterstitialAd.load(mainActivity, interUnitIdHigh, getAdRequest(this, false), new InterstitialAdLoadCallback() { 
+            @Override 
+            public void onAdLoaded(InterstitialAd interstitialAd) {
+                InterstitialAd unused = MainActivity.adMobInterstitialAd = interstitialAd;
+                int unused2 = MainActivity.countInterstitial = 0;
+                MainActivity.adMobInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() { 
+                    @Override 
+                    public void onAdShowedFullScreenContent() {
+                    }
+
+                    @Override 
+                    public void onAdDismissedFullScreenContent() {
+                        InterstitialAd unused3 = MainActivity.adMobInterstitialAd = null;
+                        MainActivity.this.loadAd(MainActivity.this);
+                    }
+                });
+            }
+
+            @Override 
+            public void onAdFailedToLoad(LoadAdError loadAdError) {
+                Log.i(MainActivity.this.TAG, loadAdError.getMessage());
+                InterstitialAd unused = MainActivity.adMobInterstitialAd = null;
+                MainActivity.access$708();
+                if (MainActivity.countInterstitial > 3) {
+                    int unused2 = MainActivity.countInterstitial = 0;
+                } else {
+                    MainActivity.this.loadAd(mainActivity);
+                }
+                Log.i("Interstitial", "onAdFailedToLoad: " + MainActivity.countInterstitial);
+            }
+        });
+    }
+
+    private AdSize getAdSize() {
+        Display defaultDisplay = getWindowManager().getDefaultDisplay();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        defaultDisplay.getMetrics(displayMetrics);
+        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(getApplicationContext(), (int) (displayMetrics.widthPixels / displayMetrics.density));
+    }
+
+    public static AdRequest getAdRequest(Context context, boolean z) {
+        return new AdRequest.Builder().build();
+    }
+
+    public void showInterstitialAd() {
+        InterstitialAd interstitialAd = adMobInterstitialAd;
+        if (interstitialAd != null) {
+            interstitialAd.show(this);
+            LocalStorage.setOpensWithoutAd(this, 0);
+            return;
+        }
+        Log.d("ad_count", "The interstitial ad wasn't ready yet.");
+    }
+
+    public void showVideoAd() {
+        RewardedAd rewardedAd = this.videoAd;
+        if (rewardedAd != null) {
+            rewardedAd.show(this, new OnUserEarnedRewardListener() { 
+                @Override 
+                public void onUserEarnedReward(RewardItem rewardItem) {
+                    Log.d(MainActivity.this.TAG, "The user earned the reward.");
+                    MainActivity.this.loadRewardedVideoAd();
+                    SkinDetailsFragment.getInstance().startAction();
+                    if (MainActivity.this.fragmentCallback != null) {
+                        MainActivity mainActivity = MainActivity.this;
+                        mainActivity.calledOnResume = mainActivity.fragmentCallback;
+                        MainActivity.this.fragmentCallback = null;
+                    }
+                }
+            });
+        } else {
+            Log.d(this.TAG, "The rewarded ad wasn't ready yet.");
+        }
+    }
+}
