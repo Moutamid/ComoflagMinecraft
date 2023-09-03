@@ -102,7 +102,7 @@ public class SkinDetailsFragment extends BaseFragment {
             int opensWithoutAd = LocalStorage.getOpensWithoutAd(getContext());
             if (opensWithoutAd >= 2 || opensWithoutAd < 0) {
                 if (getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).showInterstitialAd();
+                    ((MainActivity) getActivity()).showVideoAd();
                 }
             } else {
                 LocalStorage.setOpensWithoutAd(getContext(), opensWithoutAd + 1);
@@ -197,6 +197,7 @@ public class SkinDetailsFragment extends BaseFragment {
     public void processActions() {
         if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).showVideoAd();
+            startAction();
         }
     }
 

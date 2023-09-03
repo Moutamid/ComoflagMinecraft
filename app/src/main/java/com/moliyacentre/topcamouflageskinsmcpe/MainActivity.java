@@ -8,6 +8,9 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Window;
 import android.widget.FrameLayout;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
@@ -29,6 +32,16 @@ import com.moliyacentre.topcamouflageskinsmcpe.fragment.SkinDetailsFragment;
 import com.moliyacentre.topcamouflageskinsmcpe.fragment.SkinsFragment;
 import com.moliyacentre.topcamouflageskinsmcpe.utils.LocalStorage;
 import com.moliyacentre.topcamouflageskinsmcpe.utils.SharedPref;
+import com.yodo1.mas.Yodo1Mas;
+import com.yodo1.mas.appopenad.Yodo1MasAppOpenAd;
+import com.yodo1.mas.appopenad.Yodo1MasAppOpenAdListener;
+import com.yodo1.mas.banner.Yodo1MasBannerAdListener;
+import com.yodo1.mas.banner.Yodo1MasBannerAdView;
+import com.yodo1.mas.error.Yodo1MasError;
+import com.yodo1.mas.helper.model.Yodo1MasAdBuildConfig;
+import com.yodo1.mas.reward.Yodo1MasRewardAd;
+import com.yodo1.mas.reward.Yodo1MasRewardAdListener;
+
 import io.github.inflationx.viewpump.ViewPumpContextWrapper;
 
 
@@ -37,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements IMainManager {
     private static int countBanner = 1;
     private static int countInterstitial = 1;
     private static int countReward = 1;
-    public static FrameLayout frameLayout;
+//    public static FrameLayout frameLayout;
     private String TAG = "MainActivity";
     AdView adView;
     private IRewardAdded calledOnResume;
@@ -63,11 +76,66 @@ public class MainActivity extends AppCompatActivity implements IMainManager {
         countInterstitial = i + 1;
         return i;
     }
-
+    private Yodo1MasBannerAdView bannerAdView;
     @Override 
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.activity_main);
+
+//        Yodo1MasAdBuildConfig config = new Yodo1MasAdBuildConfig.Builder().enableUserPrivacyDialog(true).build();
+//        Yodo1Mas.getInstance().setAdBuildConfig(config);
+        Yodo1Mas.getInstance().init(this, "SWvX28aTXM", new Yodo1Mas.InitListener() {
+            @Override public void onMasInitSuccessful() {
+
+
+            }
+            @Override public void onMasInitFailed(@NonNull Yodo1MasError error) { } });
+        bannerAdView = findViewById(R.id.yodo1_mas_banner);
+        bannerAdView.loadAd();
+
+
+
+
+        Yodo1MasAppOpenAd appOpenAd = Yodo1MasAppOpenAd.getInstance();
+
+        appOpenAd.loadAd(MainActivity.this);
+
+        appOpenAd.setAdListener(new Yodo1MasAppOpenAdListener() {
+            @Override
+            public void onAppOpenAdLoaded(Yodo1MasAppOpenAd ad) {
+                // Code to be executed when an ad finishes loading.
+                ad.showAd(MainActivity.this);
+            }
+
+            @Override
+            public void onAppOpenAdFailedToLoad(Yodo1MasAppOpenAd ad, @NonNull Yodo1MasError error) {
+                // Code to be executed when an ad request fails.
+            }
+
+            @Override
+            public void onAppOpenAdOpened(Yodo1MasAppOpenAd ad) {
+                // Code to be executed when an ad opens an overlay that
+                // covers the screen.
+            }
+
+            @Override
+            public void onAppOpenAdFailedToOpen(Yodo1MasAppOpenAd ad, @NonNull Yodo1MasError error) {
+                // Code to be executed when an ad open fails.
+            }
+
+            @Override
+            public void onAppOpenAdClosed(Yodo1MasAppOpenAd ad) {
+                // Code to be executed when the user is about to return
+                // to the app after tapping on an ad.
+            }
+        });
+
+
+
+
+
+
+
         this.sharedPref = new SharedPref(this);
         if (Build.VERSION.SDK_INT >= 21) {
             Window window = getWindow();
@@ -75,10 +143,10 @@ public class MainActivity extends AppCompatActivity implements IMainManager {
             window.clearFlags(67108864);
         }
         this.adView = new AdView(this);
-        frameLayout = (FrameLayout) findViewById(R.id.adView);
+//        frameLayout = (FrameLayout) findViewById(R.id.adView);
         loadRewardedVideoAd();
-        loadAd(this);
-        loadBanner();
+//        loadAd(this);
+//        loadBanner();
         setScreen(SkinsFragment.createInstance(0));
     }
 
@@ -120,7 +188,6 @@ public class MainActivity extends AppCompatActivity implements IMainManager {
         dialogFragment.show(getSupportFragmentManager(), dialogFragment.getTag());
     }
 
-    
     public void loadRewardedVideoAd() {
         String rewardUnitIdHigh;
         int i = countReward;
@@ -131,29 +198,84 @@ public class MainActivity extends AppCompatActivity implements IMainManager {
         } else {
             rewardUnitIdHigh = i != 3 ? "" : this.sharedPref.getRewardUnitIdLow();
         }
-        RewardedAd.load(this, rewardUnitIdHigh, new AdRequest.Builder().build(), new RewardedAdLoadCallback() {
-            @Override 
-            public void onAdFailedToLoad(LoadAdError loadAdError) {
+        Yodo1MasRewardAd.getInstance().setAdListener(new Yodo1MasRewardAdListener() {
+
+            @Override
+            public void onRewardAdLoaded(Yodo1MasRewardAd ad) {
+
+
+
+                int unused = MainActivity.countReward = 0;
+                Log.d(MainActivity.this.TAG, "Reward Ad was loaded.");
+
+            }
+
+
+            @Override
+            public void onRewardAdFailedToLoad(Yodo1MasRewardAd ad, @NonNull Yodo1MasError error) {
                 MainActivity.access$008();
                 if (MainActivity.countReward <= 3) {
                     MainActivity.this.loadRewardedVideoAd();
                 } else {
                     int unused = MainActivity.countReward = 0;
                 }
-                Log.d(MainActivity.this.TAG, loadAdError.toString());
-                MainActivity.this.videoAd = null;
+
             }
 
-            @Override 
-            public void onAdLoaded(RewardedAd rewardedAd) {
-                MainActivity.this.videoAd = rewardedAd;
-                int unused = MainActivity.countReward = 0;
-                Log.d(MainActivity.this.TAG, "Reward Ad was loaded.");
+            @Override
+            public void onRewardAdOpened(Yodo1MasRewardAd ad) {
+
+            }
+
+            @Override
+            public void onRewardAdFailedToOpen(Yodo1MasRewardAd ad, @NonNull Yodo1MasError error) {
+                ad.loadAd(MainActivity.this);
+            }
+
+            @Override
+            public void onRewardAdClosed(Yodo1MasRewardAd ad) {
+                ad.loadAd(MainActivity.this);
+            }
+
+            @Override
+            public void onRewardAdEarned(Yodo1MasRewardAd ad) {
+
             }
         });
     }
 
-    
+//        public void loadRewardedVideoAd() {
+//        String rewardUnitIdHigh;
+//        int i = countReward;
+//        if (i == 1) {
+//            rewardUnitIdHigh = this.sharedPref.getRewardUnitIdHigh();
+//        } else if (i == 2) {
+//            rewardUnitIdHigh = this.sharedPref.getRewardUnitIdMid();
+//        } else {
+//            rewardUnitIdHigh = i != 3 ? "" : this.sharedPref.getRewardUnitIdLow();
+//        }
+//        RewardedAd.load(this, rewardUnitIdHigh, new AdRequest.Builder().build(), new RewardedAdLoadCallback() {
+//            @Override
+//            public void onAdFailedToLoad(LoadAdError loadAdError) {
+//                MainActivity.access$008();
+//                if (MainActivity.countReward <= 3) {
+//                    MainActivity.this.loadRewardedVideoAd();
+//                } else {
+//                    int unused = MainActivity.countReward = 0;
+//                }
+//                Log.d(MainActivity.this.TAG, loadAdError.toString());
+//                MainActivity.this.videoAd = null;
+//            }
+//
+//            @Override
+//            public void onAdLoaded(RewardedAd rewardedAd) {
+//                MainActivity.this.videoAd = rewardedAd;
+//                int unused = MainActivity.countReward = 0;
+//                Log.d(MainActivity.this.TAG, "Reward Ad was loaded.");
+//            }
+//        });
+//    }
+
     public void loadBanner() {
         String bannerUnitIdHigh;
         int i = countBanner;
@@ -164,12 +286,16 @@ public class MainActivity extends AppCompatActivity implements IMainManager {
         } else {
             bannerUnitIdHigh = i != 3 ? "" : this.sharedPref.getBannerUnitIdLow();
         }
-        AdView adView = new AdView(this);
-        this.adView = adView;
-        adView.setAdUnitId(bannerUnitIdHigh);
-        this.adView.setAdListener(new AdListener() { 
-            @Override 
-            public void onAdFailedToLoad(LoadAdError loadAdError) {
+        bannerAdView.setAdListener(new Yodo1MasBannerAdListener() {
+            @Override public void onBannerAdLoaded(Yodo1MasBannerAdView bannerAdView) {
+// Code to be executed when an ad finishes loading.
+                Log.i("BannerAd", "onAdLoaded: " + MainActivity.countBanner);
+                int unused = MainActivity.countBanner = 0;
+
+            }
+            @Override
+            public void onBannerAdFailedToLoad(Yodo1MasBannerAdView bannerAdView, @NonNull Yodo1MasError error) {
+// Code to be executed when an ad request fails.
                 MainActivity.access$408();
                 if (MainActivity.countBanner <= 3) {
                     MainActivity.this.loadBanner();
@@ -178,65 +304,102 @@ public class MainActivity extends AppCompatActivity implements IMainManager {
                 }
                 Log.i("BannerAd", "onAdFailedToLoad: " + MainActivity.countBanner);
             }
-
-            @Override 
-            public void onAdLoaded() {
-                Log.i("BannerAd", "onAdLoaded: " + MainActivity.countBanner);
-                int unused = MainActivity.countBanner = 0;
+            @Override public void onBannerAdOpened(Yodo1MasBannerAdView bannerAdView) {
+// Code to be executed when an ad opens an overlay that covers the screen.
             }
-        });
-        frameLayout.removeAllViews();
-        frameLayout.addView(this.adView);
-        AdRequest build = new AdRequest.Builder().build();
-        AdSize adSize = getAdSize();
-        if (adSize != null) {
-            this.adView.setAdSize(adSize);
-            this.adView.loadAd(build);
-        }
-    }
-
-    public void loadAd(final MainActivity mainActivity) {
-        String interUnitIdHigh;
-        int i = countInterstitial;
-        if (i == 1) {
-            interUnitIdHigh = this.sharedPref.getInterUnitIdHigh();
-        } else if (i == 2) {
-            interUnitIdHigh = this.sharedPref.getInterUnitIdMid();
-        } else {
-            interUnitIdHigh = i != 3 ? "" : this.sharedPref.getInterUnitIdLow();
-        }
-        InterstitialAd.load(mainActivity, interUnitIdHigh, getAdRequest(this, false), new InterstitialAdLoadCallback() { 
-            @Override 
-            public void onAdLoaded(InterstitialAd interstitialAd) {
-                InterstitialAd unused = MainActivity.adMobInterstitialAd = interstitialAd;
-                int unused2 = MainActivity.countInterstitial = 0;
-                MainActivity.adMobInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() { 
-                    @Override 
-                    public void onAdShowedFullScreenContent() {
-                    }
-
-                    @Override 
-                    public void onAdDismissedFullScreenContent() {
-                        InterstitialAd unused3 = MainActivity.adMobInterstitialAd = null;
-                        MainActivity.this.loadAd(MainActivity.this);
-                    }
-                });
+            @Override
+            public void onBannerAdFailedToOpen(Yodo1MasBannerAdView bannerAdView, @NonNull Yodo1MasError error) {
+// Code to be executed when an ad open fails.
             }
+            @Override
+            public void onBannerAdClosed(Yodo1MasBannerAdView bannerAdView) {
+// Code to be executed when the user is about to return to the app after tapping on an ad.
+            } }); bannerAdView.loadAd(); }
 
-            @Override 
-            public void onAdFailedToLoad(LoadAdError loadAdError) {
-                Log.i(MainActivity.this.TAG, loadAdError.getMessage());
-                InterstitialAd unused = MainActivity.adMobInterstitialAd = null;
-                MainActivity.access$708();
-                if (MainActivity.countInterstitial > 3) {
-                    int unused2 = MainActivity.countInterstitial = 0;
-                } else {
-                    MainActivity.this.loadAd(mainActivity);
-                }
-                Log.i("Interstitial", "onAdFailedToLoad: " + MainActivity.countInterstitial);
-            }
-        });
-    }
+    
+//    public void loadBanner() {
+//        String bannerUnitIdHigh;
+//        int i = countBanner;
+//        if (i == 1) {
+//            bannerUnitIdHigh = this.sharedPref.getBannerUnitIdHigh();
+//        } else if (i == 2) {
+//            bannerUnitIdHigh = this.sharedPref.getBannerUnitIdMid();
+//        } else {
+//            bannerUnitIdHigh = i != 3 ? "" : this.sharedPref.getBannerUnitIdLow();
+//        }
+//        AdView adView = new AdView(this);
+//        this.adView = adView;
+//        adView.setAdUnitId(bannerUnitIdHigh);
+//        this.adView.setAdListener(new AdListener() {
+//            @Override
+//            public void onAdFailedToLoad(LoadAdError loadAdError) {
+//                MainActivity.access$408();
+//                if (MainActivity.countBanner <= 3) {
+//                    MainActivity.this.loadBanner();
+//                } else {
+//                    int unused = MainActivity.countBanner = 0;
+//                }
+//                Log.i("BannerAd", "onAdFailedToLoad: " + MainActivity.countBanner);
+//            }
+//
+//            @Override
+//            public void onAdLoaded() {
+//                Log.i("BannerAd", "onAdLoaded: " + MainActivity.countBanner);
+//                int unused = MainActivity.countBanner = 0;
+//            }
+//        });
+//        frameLayout.removeAllViews();
+//        frameLayout.addView(this.adView);
+//        AdRequest build = new AdRequest.Builder().build();
+//        AdSize adSize = getAdSize();
+//        if (adSize != null) {
+//            this.adView.setAdSize(adSize);
+//            this.adView.loadAd(build);
+//        }
+//    }
+
+//    public void loadAd(final MainActivity mainActivity) {
+//        String interUnitIdHigh;
+//        int i = countInterstitial;
+//        if (i == 1) {
+//            interUnitIdHigh = this.sharedPref.getInterUnitIdHigh();
+//        } else if (i == 2) {
+//            interUnitIdHigh = this.sharedPref.getInterUnitIdMid();
+//        } else {
+//            interUnitIdHigh = i != 3 ? "" : this.sharedPref.getInterUnitIdLow();
+//        }
+//        InterstitialAd.load(mainActivity, interUnitIdHigh, getAdRequest(this, false), new InterstitialAdLoadCallback() {
+//            @Override
+//            public void onAdLoaded(InterstitialAd interstitialAd) {
+//                InterstitialAd unused = MainActivity.adMobInterstitialAd = interstitialAd;
+//                int unused2 = MainActivity.countInterstitial = 0;
+//                MainActivity.adMobInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+//                    @Override
+//                    public void onAdShowedFullScreenContent() {
+//                    }
+//
+//                    @Override
+//                    public void onAdDismissedFullScreenContent() {
+//                        InterstitialAd unused3 = MainActivity.adMobInterstitialAd = null;
+//                        MainActivity.this.loadAd(MainActivity.this);
+//                    }
+//                });
+//            }
+//
+//            @Override
+//            public void onAdFailedToLoad(LoadAdError loadAdError) {
+//                Log.i(MainActivity.this.TAG, loadAdError.getMessage());
+//                InterstitialAd unused = MainActivity.adMobInterstitialAd = null;
+//                MainActivity.access$708();
+//                if (MainActivity.countInterstitial > 3) {
+//                    int unused2 = MainActivity.countInterstitial = 0;
+//                } else {
+//                    MainActivity.this.loadAd(mainActivity);
+//                }
+//                Log.i("Interstitial", "onAdFailedToLoad: " + MainActivity.countInterstitial);
+//            }
+//        });
+//    }
 
     private AdSize getAdSize() {
         Display defaultDisplay = getWindowManager().getDefaultDisplay();
@@ -249,34 +412,38 @@ public class MainActivity extends AppCompatActivity implements IMainManager {
         return new AdRequest.Builder().build();
     }
 
-    public void showInterstitialAd() {
-        InterstitialAd interstitialAd = adMobInterstitialAd;
-        if (interstitialAd != null) {
-            interstitialAd.show(this);
-            LocalStorage.setOpensWithoutAd(this, 0);
-            return;
-        }
-        Log.d("ad_count", "The interstitial ad wasn't ready yet.");
-    }
+//    public void showInterstitialAd() {
+//        InterstitialAd interstitialAd = adMobInterstitialAd;
+//        if (interstitialAd != null) {
+//            interstitialAd.show(this);
+//            LocalStorage.setOpensWithoutAd(this, 0);
+//            return;
+//        }
+//        Log.d("ad_count", "The interstitial ad wasn't ready yet.");
+//    }
 
     public void showVideoAd() {
-        RewardedAd rewardedAd = this.videoAd;
-        if (rewardedAd != null) {
-            rewardedAd.show(this, new OnUserEarnedRewardListener() { 
-                @Override 
-                public void onUserEarnedReward(RewardItem rewardItem) {
-                    Log.d(MainActivity.this.TAG, "The user earned the reward.");
-                    MainActivity.this.loadRewardedVideoAd();
-                    SkinDetailsFragment.getInstance().startAction();
-                    if (MainActivity.this.fragmentCallback != null) {
-                        MainActivity mainActivity = MainActivity.this;
-                        mainActivity.calledOnResume = mainActivity.fragmentCallback;
-                        MainActivity.this.fragmentCallback = null;
-                    }
-                }
-            });
-        } else {
-            Log.d(this.TAG, "The rewarded ad wasn't ready yet.");
-        }
+        boolean isLoaded = Yodo1MasRewardAd.getInstance().isLoaded();
+        if(isLoaded) Yodo1MasRewardAd.getInstance().showAd(MainActivity.this, "Your Placement");
+//        RewardedAd rewardedAd = this.videoAd;
+//        if (rewardedAd != null) {
+//            rewardedAd.show(this, new OnUserEarnedRewardListener() {
+//                @Override
+//                public void onUserEarnedReward(RewardItem rewardItem) {
+//                    Log.d(MainActivity.this.TAG, "The user earned the reward.");
+//                    MainActivity.this.loadRewardedVideoAd();
+//                    SkinDetailsFragment.getInstance().startAction();
+//                    if (MainActivity.this.fragmentCallback != null) {
+//                        MainActivity mainActivity = MainActivity.this;
+//                        mainActivity.calledOnResume = mainActivity.fragmentCallback;
+//                        MainActivity.this.fragmentCallback = null;
+//                    }
+//                }
+//            });
+//        } else {
+//            Log.d(this.TAG, "The rewarded ad wasn't ready yet.");
+//        }
     }
+
+
 }
