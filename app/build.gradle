@@ -48,4 +48,9 @@ dependencies {
     implementation 'io.github.inflationx:viewpump:2.0.3'
 
     implementation 'com.yodo1.mas:full:4.9.1'
+
+    def billing_version = "6.0.0"
+    implementation "com.android.billingclient:billing:$billing_version"
+    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'com.anjlab.android.iab.v3:library:2.0.0'
 }
