@@ -38,10 +38,13 @@ import com.yodo1.mas.reward.Yodo1MasRewardAd;
 import com.yodo1.mas.reward.Yodo1MasRewardAdListener;
 
 
+import eu.dkaratzas.android.inapp.update.Constants;
+import eu.dkaratzas.android.inapp.update.InAppUpdateManager;
+import eu.dkaratzas.android.inapp.update.InAppUpdateStatus;
 import io.github.inflationx.viewpump.ViewPumpContextWrapper;
 
 //,InAppUpdateManager.InAppUpdateHandler
-public class MainActivity extends AppCompatActivity implements IMainManager {
+public class MainActivity extends AppCompatActivity implements IMainManager, InAppUpdateManager.InAppUpdateHandler {
     private static InterstitialAd adMobInterstitialAd = null;
     private static int countBanner = 1;
     private static int countInterstitial = 1;
@@ -78,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements IMainManager {
 
     private Yodo1MasBannerAdView bannerAdView;
     private static final int REQ_CODE_VERSION_UPDATE = 530;
-//    private InAppUpdateManager inAppUpdateManager;
+    private InAppUpdateManager inAppUpdateManager;
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
@@ -86,13 +89,13 @@ public class MainActivity extends AppCompatActivity implements IMainManager {
 
 
 
-//         inAppUpdateManager = InAppUpdateManager.Builder(this, REQ_CODE_VERSION_UPDATE)
-//                .resumeUpdates(true) // Resume the update, if the update was stalled. Default is true
-//                .mode(Constants.UpdateMode.FLEXIBLE)
-//                .snackBarMessage("An update has just been downloaded.")
-//                .snackBarAction("RESTART")
-//                .handler(this);
-//
+         inAppUpdateManager = InAppUpdateManager.Builder(this, REQ_CODE_VERSION_UPDATE)
+                .resumeUpdates(true) // Resume the update, if the update was stalled. Default is true
+                .mode(Constants.UpdateMode.FLEXIBLE)
+                .snackBarMessage("An update has just been downloaded.")
+                .snackBarAction("RESTART")
+                .handler(this);
+
 //        inAppUpdateManager.checkForAppUpdate();
 //        Yodo1MasAdBuildConfig config = new Yodo1MasAdBuildConfig.Builder().enableUserPrivacyDialog(true).build();
 //        Yodo1Mas.getInstance().setAdBuildConfig(config);
@@ -458,32 +461,32 @@ public class MainActivity extends AppCompatActivity implements IMainManager {
 
     }
 //
-//    @Override
-//    public void onInAppUpdateError(int code, Throwable error) {
-//
-//    }
-//
-//    @Override
-//    public void onInAppUpdateStatus(InAppUpdateStatus status) {
-//        if (status.isDownloaded()) {
-//
-//            View rootView = getWindow().getDecorView().findViewById(android.R.id.content);
-//
-//            Snackbar snackbar = Snackbar.make(rootView,
-//                    "An update has just been downloaded.",
-//                    Snackbar.LENGTH_INDEFINITE);
-//
-//            snackbar.setAction("RESTART", view -> {
-//
-//                // Triggers the completion of the update of the app for the flexible flow.
-//                inAppUpdateManager.completeUpdate();
-//
-//            });
-//
-//            snackbar.show();
-//        }
-//
-//    }
+    @Override
+    public void onInAppUpdateError(int code, Throwable error) {
+
+    }
+
+    @Override
+    public void onInAppUpdateStatus(InAppUpdateStatus status) {
+        if (status.isDownloaded()) {
+
+            View rootView = getWindow().getDecorView().findViewById(android.R.id.content);
+
+            Snackbar snackbar = Snackbar.make(rootView,
+                    "An update has just been downloaded.",
+                    Snackbar.LENGTH_INDEFINITE);
+
+            snackbar.setAction("RESTART", view -> {
+
+                // Triggers the completion of the update of the app for the flexible flow.
+                inAppUpdateManager.completeUpdate();
+
+            });
+
+            snackbar.show();
+        }
+
+    }
 ////    public void showVideoAdlist() {
 //        boolean isLoaded = Yodo1MasRewardAd.getInstance().isLoaded();
 //        if (isLoaded) {
