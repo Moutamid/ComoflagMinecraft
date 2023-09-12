@@ -1,10 +1,9 @@
 <resources>
     <string name="app_name">Camouflage Skins</string>
     <string name="admob_app_id">ca-app-pub-5580537606944457~7101494428</string>
-<!--    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>-->
     <string name="privacy_policy">Privacy Policy</string>
     <string name="privacy_polity">PRIVACY POLICY</string>
-    <string name="project_id">moliya-data</string>
+    <string name="project_id_new">moliya-data</string>
     <string name="rate_app">RATE APPS</string>
     <string name="s1">Save image</string>
     <string name="s2">Allow Ad to store image in Picture gallery?</string>
