@@ -9,13 +9,20 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.anjlab.android.iab.v3.BillingProcessor;
 import com.anjlab.android.iab.v3.PurchaseInfo;
 import com.anjlab.android.iab.v3.SkuDetails;
 import com.girlsskinsminecraft.boyskinsminecraft.utils.ConstantFunctions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -33,6 +40,27 @@ public class SplashActivity extends AppCompatActivity implements BillingProcesso
         super.onCreate(bundle);
         this.mHandler.postDelayed(this.mPendingLauncherRunnable, 1000L);
 
+
+
+        DatabaseReference ref2 = FirebaseDatabase.getInstance().getReference();
+        ref2.addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        //Get map of users in datasnapshot
+
+                        String total_val= dataSnapshot.child("total_images").getValue().toString();
+                        SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref",MODE_PRIVATE);
+                        SharedPreferences.Editor myEdit = sharedPreferences.edit();
+                        myEdit.putString("total", total_val);
+                        myEdit.commit();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        //handle databaseError
+                    }
+                });
 
     }
 

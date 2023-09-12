@@ -1,10 +1,13 @@
 package com.girlsskinsminecraft.boyskinsminecraft.fragment;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -46,6 +49,7 @@ public class SkinsFragment extends BaseFragment {
     public static final int MODE_VIEWS = 3;
     private SkinsAdapter adapter;
     private DrawerLayout drawerLayout;
+    private TextView tvtotal;
     private ProgressDialog mProgressDialog;
     private View mView;
     private RecyclerView recyclerView;
@@ -53,6 +57,7 @@ public class SkinsFragment extends BaseFragment {
     private final ArrayList<Skin> allSkinsList = new ArrayList<>();
     private final ArrayList<Skin> filteredSkinsList = new ArrayList<>();
     private boolean unsort = true;
+    int total_items;
     private SkinsAdapter.OnItemSelected mOnItemSelected = new SkinsAdapter.OnItemSelected() { 
         @Override 
         public final void onItemSelected(Skin skin) {
@@ -80,6 +85,10 @@ public class SkinsFragment extends BaseFragment {
         if (getContext() == null) {
             return this.mView;
         }
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("MySharedPref",MODE_PRIVATE);
+         total_items= Integer.parseInt(sharedPreferences.getString("total","43130"));
+        tvtotal=mView.findViewById(R.id.total_name);
+        tvtotal.setText(String.valueOf(total_items));
         NavigationView navigationView = (NavigationView) this.mView.findViewById(R.id.nav_view);
         navigationView.setItemIconTintList(null);
         navigationView.setNavigationItemSelectedListener(this.itemListener);
@@ -216,8 +225,9 @@ public class SkinsFragment extends BaseFragment {
     private void initData() {
         this.allSkinsList.clear();
         Context context = getContext();
+
         int mode = getMode();
-        for (int i = 0; i <= getResources().getInteger(R.integer.total_items); i++) {
+        for (int i = 0; i <= total_items; i++) {
             Skin skin = new Skin(i);
             if (mode != 0) {
                 if (mode != 1) {
