@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Camouflage Skins</string>
     <string name="admob_app_id">ca-app-pub-5580537606944457~7101494428</string>
-    <!--    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>-->
+<!--    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>-->
     <string name="privacy_policy">Privacy Policy</string>
     <string name="privacy_polity">PRIVACY POLICY</string>
     <string name="project_id">moliya-data</string>
@@ -33,6 +33,7 @@
     <string name="material_slider_range_end">Range end,</string>
     <string name="material_slider_range_start">Range start,</string>
     <string name="more_app">MORE APP</string>
+    <string name="remove_ads">REMOVE ADS</string>
     <string name="most_downloads">MOST_DOWNLOADS</string>
     <string name="most_views">MOST VIEWS</string>
     <string name="favourite">FAVOURITE</string>

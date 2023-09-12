@@ -7,7 +7,8 @@
         </RelativeLayout>
         <View android:background="@color/divider_color" android:layout_width="match_parent" android:layout_height="2dp" android:layout_below="@+id/toolbar_container"/>
     </RelativeLayout>
-    <com.moliyacentre.topcamouflageskinsmcpe.customview.GridRelativeLayout android:layout_width="match_parent" android:layout_height="match_parent" android:layout_below="@+id/toolbar_header">
+    <com.girlsskinsminecraft.boyskinsminecraft.customview.GridRelativeLayout
+        android:layout_width="match_parent" android:layout_height="match_parent" android:layout_below="@+id/toolbar_header">
         <WebView android:id="@+id/webview" android:layout_width="match_parent" android:layout_height="match_parent"/>
-    </com.moliyacentre.topcamouflageskinsmcpe.customview.GridRelativeLayout>
+    </com.girlsskinsminecraft.boyskinsminecraft.customview.GridRelativeLayout>
 </RelativeLayout>

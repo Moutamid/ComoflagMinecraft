@@ -9,17 +9,16 @@
 
     <ImageView
         android:id="@+id/close"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
         android:layout_marginTop="15dp"
         android:layout_marginEnd="15dp"
         android:layout_marginBottom="15dp"
-        android:background="@drawable/btn_bg"
-        android:foreground="?android:attr/selectableItemBackground"
+
         android:padding="6sp"
         android:onClick="close"
-        android:src="@drawable/ic_round_close_24"
+        android:src="@drawable/baseline_cancel_24"
         tools:targetApi="m" />
 
 
@@ -43,7 +42,7 @@
                 android:textSize="32sp"
                 android:includeFontPadding="false"
                 android:fontFamily="@font/poppins"
-                android:text="Smart "
+                android:text="Camouflage "
                 android:gravity="center"
                 android:textColor="@color/black" />
 
@@ -53,7 +52,7 @@
                 android:textSize="32sp"
                 android:includeFontPadding="false"
                 android:fontFamily="@font/poppins_bold"
-                android:text="IPTV"
+                android:text="Skins"
                 android:gravity="center"
                 android:textColor="@color/v2_colorPrimary" />
 
