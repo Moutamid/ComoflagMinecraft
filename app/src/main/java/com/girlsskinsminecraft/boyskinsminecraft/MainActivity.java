@@ -460,6 +460,9 @@ public class MainActivity extends AppCompatActivity implements IMainManager, InA
 //        }
 
     }
+
+
+
 //
     @Override
     public void onInAppUpdateError(int code, Throwable error) {
